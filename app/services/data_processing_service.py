@@ -146,6 +146,49 @@ def calculate_temperature_stats(df):
     except Exception as e:
         logging.error(f"Error al calcular estadísticas de temperatura: {e}")
         raise
+def calculate_humidity_stats(df):
+    """
+    Calcula estadísticas por hora para la humedad.
+    """
+    if 'Fecha y Hora' not in df.columns or 'Humedad (%)' not in df.columns:
+        print("Las columnas 'Fecha y Hora' y 'Humedad (%)' deben existir en el DataFrame.")
+        return pd.DataFrame()
+
+    df = df.set_index('Fecha y Hora')
+
+    # Calcular estadísticas por hora
+    humidity_stats = df['Humedad (%)'].resample('1h').agg(['max', 'min', 'mean']).dropna()
+
+    humidity_stats.rename(columns={
+        'max': 'Humedad Máxima (%)',
+        'min': 'Humedad Mínima (%)',
+        'mean': 'Humedad Promedio (%)'
+    }, inplace=True)
+
+    return humidity_stats
+
+def calculate_pressure_stats(df):
+    """
+    Calcula estadísticas por hora para la presión atmosférica.
+    """
+    if 'Fecha y Hora' not in df.columns or 'Presión Atmosférica (hPa)' not in df.columns:
+        print("Las columnas 'Fecha y Hora' y 'Presión Atmosférica (hPa)' deben existir en el DataFrame.")
+        return pd.DataFrame()
+
+    # Asegurarse de que 'Fecha y Hora' sea un índice
+    df = df.set_index('Fecha y Hora')
+
+    # Calcular estadísticas por hora
+    pressure_stats = df['Presión Atmosférica (hPa)'].resample('1h').agg(['max', 'min', 'mean']).dropna()
+
+    # Renombrar columnas para mayor claridad
+    pressure_stats.rename(columns={
+        'max': 'Presión Máxima (hPa)',
+        'min': 'Presión Mínima (hPa)',
+        'mean': 'Presión Promedio (hPa)'
+    }, inplace=True)
+
+    return pressure_stats
 
 def calculate_daily_stats_with_date_column(df):
     """

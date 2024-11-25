@@ -1,10 +1,10 @@
-from pydantic import BaseModel
-from datetime import datetime
+from sqlalchemy import Column, Integer, String, Float
+from app.db import Base
 
-# Modelo Pydantic para los datos climáticos
-class ClimateData(BaseModel):
-    timestamp: datetime
-    temperature: float
-    humidity: float
-    pressure: float
-    location: str
+class ClimateData(Base):
+    __tablename__ = "climate_data"
+    id = Column(Integer, primary_key=True, index=True)
+    temperature = Column(Float, nullable=False)
+    humidity = Column(Float, nullable=False)
+    pressure = Column(Float, nullable=False)
+    timestamp = Column(String, index=True, nullable=False)
