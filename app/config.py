@@ -1,12 +1,40 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+
 
 class Settings(BaseSettings):
     app_name: str = "API de Datos Climáticos"
     debug: bool = True
-    database_url: str
+    database_url: str  # Este campo es obligatorio y viene del archivo .env
+
+    # Configuración de ThingSpeak
+    thingspeak_api_url: str
+    thingspeak_api_key: str
+    thingspeak_results: int
+
+    # Configuración de la base de datos
+    db_host: str
+    db_port: int
+    db_name: str
+    db_user: str
+    db_password: str
+
+    # Configuración de seguridad
+    secret_key: str
+    algorithm: str
+    access_token_expire_minutes: int
+
+    # Configuración del modelo LSTM
+    lstm_input_dim: int
+    lstm_hidden_dim: int
+    lstm_num_layers: int
+    lstm_output_dim: int
+    lstm_epochs: int
+    lstm_learning_rate: float
 
     class Config:
         env_file = ".env"
+
+
 
 settings = Settings()
 import os

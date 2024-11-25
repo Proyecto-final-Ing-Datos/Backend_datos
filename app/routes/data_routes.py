@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 from app.services.thingspeak_service import fetch_data_from_thingspeak
 from app.services.data_processing_service import (
     preprocess_data,
@@ -10,30 +11,39 @@ from app.services.data_processing_service import (
     calculate_pressure_stats,
     calculate_daily_stats_with_date_column,
 )
+from app.services.database_service import save_original_data_to_db, save_cleaned_data_to_db
+from app.db import get_db
 
 router = APIRouter()
 
 @router.get("/original")
-def get_original_data():
+def get_original_data(db: Session = Depends(get_db)):
     """
-    Devuelve los datos originales sin preprocesar desde ThingSpeak.
+    Obtiene los datos originales desde ThingSpeak y los guarda en la base de datos.
     """
     df, channel_info = fetch_data_from_thingspeak()
     if df.empty:
         return {"message": "No se encontraron datos originales."}
+
+    # Guardar en la base de datos
+    save_original_data_to_db(db, df.to_dict(orient="records"))
     return {"channel_info": channel_info, "data": df.to_dict(orient="records")}
 
 @router.get("/cleaned")
-def get_cleaned_data():
+def get_cleaned_data(db: Session = Depends(get_db)):
     """
-    Devuelve los datos preprocesados.
+    Obtiene los datos originales, los limpia y los guarda en la base de datos.
     """
     df, _ = fetch_data_from_thingspeak()
     if df.empty:
         return {"message": "No se encontraron datos originales para limpiar."}
 
-    df = preprocess_data(df)
-    return {"data": df.to_dict(orient="records")}
+    # Preprocesar datos
+    df_cleaned = preprocess_data(df)
+
+    # Guardar en la base de datos
+    save_cleaned_data_to_db(db, df_cleaned.to_dict(orient="records"))
+    return {"data": df_cleaned.to_dict(orient="records")}
 
 @router.get("/processed-data")
 def get_processed_data():

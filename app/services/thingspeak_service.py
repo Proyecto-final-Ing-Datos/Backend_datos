@@ -1,6 +1,8 @@
 import pandas as pd
 import requests
 import logging
+import unicodedata
+
 
 # Configuración básica de logs
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -33,6 +35,14 @@ def fetch_data_from_thingspeak(url=THING_SPEAK_URL):
 
         # Crear DataFrame a partir de los feeds
         df = pd.DataFrame(feeds)
+
+        # Limpiar cadenas no válidas
+        for column in df.columns:
+            if df[column].dtype == "object":  # Solo procesar columnas de tipo string
+                df[column] = df[column].apply(
+                    lambda x: unicodedata.normalize('NFKD', x).encode('ascii', errors='ignore').decode('utf-8', errors='ignore') if isinstance(x, str) else x
+                )
+
         logging.info(f"Datos obtenidos exitosamente. Total de registros: {len(df)}")
         return df, channel_info
     except requests.RequestException as e:

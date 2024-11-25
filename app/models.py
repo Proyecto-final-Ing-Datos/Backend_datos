@@ -3,8 +3,9 @@ from app.db import Base
 
 class ClimateData(Base):
     __tablename__ = "climate_data"
+
     id = Column(Integer, primary_key=True, index=True)
-    temperature = Column(Float, nullable=False)
-    humidity = Column(Float, nullable=False)
-    pressure = Column(Float, nullable=False)
-    timestamp = Column(String, index=True, nullable=False)
+    temperature = Column(Float)
+    humidity = Column(Float)
+    pressure = Column(Float)
+    timestamp = Column(String, index=True)
